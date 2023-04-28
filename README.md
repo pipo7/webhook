@@ -7,6 +7,10 @@ Usage :
  OR do a postman or curl POST query, NOTE ensure webserver is running at 8080 at /api/polka/webhooks
  curl POST http://localhost:8080/api/polka/webhooks
 
+Select OAUTH2:
+TokenPrefix: ApiKey
+Access Token: <give the acess token>
+
  Response:
  {
 	is_chirpy_red: true
@@ -25,3 +29,6 @@ Webhooks are transmitted via HTTP or HTTPS, usually as a POST request over a spe
 
 # Are webhooks and websockets the same thing?
 Nope! A websocket is a persistent connection between a client and a server. Websockets are typically used for real-time communication, like chat apps. Webhooks are a one-way communication from a third-party service to your server.
+
+
+
