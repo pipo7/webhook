@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
 )
 
 type WebhookRequest struct {
@@ -18,6 +21,22 @@ type WebhookResponse struct {
 
 func WebhookHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// first check whether it has authorization key
+		fmt.Printf("http request: %v", r)
+		authHeader := r.Header.Get("Authorization")
+		fmt.Printf("authoHeader: %v", authHeader)
+		if authHeader == "" {
+			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
+			return
+		}
+
+		apiString := strings.TrimPrefix(authHeader, "ApiKey ")
+
+		if apiString != apiCfg.APIKey {
+			http.Error(w, "Invalid API key", http.StatusUnauthorized)
+			return
+		}
+
 		var req WebhookRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -71,5 +90,18 @@ func (db *DB) UpdateMembership(userID int, membership bool) (User, error) {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	apikey := os.Getenv("APIKey")
+
+	apiCfg := &config.ApiConfig{
+		FileserverHits: 0,
+		JwtSecret:      jwtSecret,
+		APIKey:         apikey,
+	}
+
 	WebhookHandler()
 }
